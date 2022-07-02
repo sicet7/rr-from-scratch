@@ -1,0 +1,69 @@
+version: "2.7"
+
+rpc:
+    listen: tcp://127.0.0.1:6001
+
+server:
+    command: "php worker.php"
+    relay: "tcp://127.0.0.1:7000"
+    env:
+        - XDEBUG_SESSION: 1
+
+http:
+    address: 0.0.0.0:8080
+    pool:
+        num_workers: 1
+        max_jobs: 10
+        debug: true
+    access_logs: false
+    max_request_size: 256
+    middleware: [ "headers", "gzip", "static" ]
+
+    uploads:
+        dir: "./var/uploads"
+
+    static:
+        dir: "./public"
+        forbid: [ "" ]
+        calculate_etag: true
+        weak: false
+        allow: [ ".ico", ]
+
+    headers:
+        cors:
+            allowed_origin: "*"
+            allowed_headers: "*"
+            allowed_methods: "*"
+            allow_credentials: true
+            exposed_headers: "Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma"
+            max_age: 600
+
+        response:
+            X-Powered-By: "MRS Inc."
+
+metrics:
+    address: 127.0.0.1:2112
+    collect:
+        app_test_counter:
+            type: counter
+            help: "Application counter."
+            labels: ["type"]
+
+reload:
+    interval: 1s
+    patterns: [ ".php" ]
+
+    services:
+        http:
+            dirs: [ "./src/" ]
+            recursive: true
+            patterns: [ ".php" ]
+
+logs:
+    mode: development
+    level: debug
+    encoding: json
+    file_logger_options:
+        log_output: "./var/log/system.log"
+        max_backups: 0
+        compress: false
