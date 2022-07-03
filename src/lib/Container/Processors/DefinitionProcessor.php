@@ -24,7 +24,7 @@ final class DefinitionProcessor implements AttributeProcessorInterface
     public function getDefinitionsForClass(\ReflectionClass $class): array
     {
         $fqcn = $class->getName();
-        $attributes = $class->getAttributes();
+        $attributes = $class->getAttributes(Definition::class, \ReflectionAttribute::IS_INSTANCEOF);
         if (empty($attributes)) {
             return [];
         }

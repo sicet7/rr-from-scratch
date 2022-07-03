@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Sicet7\Container\Attributes\Definition;
+use Sicet7\PropertyInjection\Attributes\Inject;
 use Spiral\RoadRunner\Metrics\Metrics;
 
 #[Definition([RequestHandlerInterface::class])]
@@ -16,32 +17,20 @@ class TestRequestHandler implements RequestHandlerInterface
     /**
      * @var ResponseFactoryInterface
      */
+    #[Inject]
     private ResponseFactoryInterface $responseFactory;
 
     /**
      * @var StreamFactoryInterface
      */
+    #[Inject]
     private StreamFactoryInterface $streamFactory;
 
     /**
      * @var Metrics
      */
+    #[Inject]
     private Metrics $metrics;
-
-    /**
-     * @param ResponseFactoryInterface $responseFactory
-     * @param StreamFactoryInterface $streamFactory
-     * @param Metrics $metrics
-     */
-    public function __construct(
-        ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        Metrics $metrics
-    ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory = $streamFactory;
-        $this->metrics = $metrics;
-    }
 
     /**
      * @param ServerRequestInterface $request
@@ -49,7 +38,7 @@ class TestRequestHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-//        $this->metrics->add('app_test_counter', 1.2, [ "my-type" ]);
+        $this->metrics->add('app_test_counter', 1.2, [ "my-type" ]);
         return $this->responseFactory->createResponse()->withBody($this->streamFactory->createStream('Hello World'));
     }
 }

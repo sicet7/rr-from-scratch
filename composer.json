@@ -12,7 +12,8 @@
         "psr/http-server-handler": "^1.0",
         "psr/event-dispatcher": "^1.0",
         "psr/log": "^3.0",
-        "spiral/roadrunner-metrics": "^2.0"
+        "spiral/roadrunner-metrics": "^2.0",
+        "slim/slim": "4.*"
     },
     "autoload": {
         "psr-4": {

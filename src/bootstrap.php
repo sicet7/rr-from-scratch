@@ -3,6 +3,7 @@
 use Sicet7\Container\ContainerBuilder;
 use Sicet7\Container\Processors\DefinitionProcessor;
 use Sicet7\Module\ModuleProcessor;
+use Sicet7\PropertyInjection\InjectionProcessor;
 
 /**
  * Processors registrations
@@ -12,6 +13,7 @@ use Sicet7\Module\ModuleProcessor;
  */
 ContainerBuilder::registerProcessor(DefinitionProcessor::class);
 ContainerBuilder::registerProcessor(ModuleProcessor::class);
+ContainerBuilder::registerProcessor(InjectionProcessor::class);
 
 /**
  * Source registrations
