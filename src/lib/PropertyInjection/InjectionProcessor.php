@@ -3,31 +3,29 @@
 namespace Sicet7\PropertyInjection;
 
 use DI\Definition\Resolver\ObjectCreator;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Sicet7\Container\Interfaces\AttributeProcessorInterface;
 use Sicet7\PropertyInjection\Attributes\Inject;
 use Sicet7\PropertyInjection\Exceptions\PropertyInjectionException;
+use Sicet7\PropertyInjection\Interfaces\IgnoreAutoInjectionInterface;
 use function DI\decorate;
 
 class InjectionProcessor implements AttributeProcessorInterface
 {
-
-    public function __construct()
-    {
-    }
+    /**
+     * @var array
+     */
+    private array $injectionsCollection = [];
 
     /**
      * @param \ReflectionClass $class
-     * @return array
+     * @return array<string, array>
      * @throws PropertyInjectionException
      */
-    public function getDefinitionsForClass(\ReflectionClass $class): array
+    public static function getInjectionPoints(\ReflectionClass $class): array
     {
-        /* can only inject on classes with a definition in the container. */
-        if (empty($class->getAttributes())) {
-            return [];
-        }
-
         if (empty($properties = $class->getProperties())) {
             return [];
         }
@@ -81,30 +79,60 @@ class InjectionProcessor implements AttributeProcessorInterface
                 break;
             }
         }
+        return $injectionPoints;
+    }
+
+    /**
+     * @param object $target
+     * @param ContainerInterface $container
+     * @return void
+     * @throws PropertyInjectionException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public static function injectPropertiesOnObjectFromContainer(
+        object $target,
+        ContainerInterface $container
+    ): void {
+        $reflection = new \ReflectionClass($target);
+        $injectionPoints = self::getInjectionPoints($reflection);
+        foreach ($injectionPoints as $propertyName => $def) {
+            [$definitionName, $optional] = $def;
+            if ($optional === true && !$container->has($definitionName)) {
+                continue;
+            }
+            ObjectCreator::setPrivatePropertyValue(
+                null,
+                $target,
+                $propertyName,
+                $container->get($definitionName)
+            );
+        }
+    }
+
+    public function __construct()
+    {
+    }
+
+    /**
+     * @param \ReflectionClass $class
+     * @return array
+     * @throws PropertyInjectionException
+     */
+    public function getDefinitionsForClass(\ReflectionClass $class): array
+    {
+        if ($class->implementsInterface(IgnoreAutoInjectionInterface::class)) {
+            return [];
+        }
+
+        $injectionPoints = self::getInjectionPoints($class);
 
         if (empty($injectionPoints)) {
             return [];
         }
 
-        $className = $class->getName();
-
-        return [
-            $className => decorate(function ($previous, ContainerInterface $container) use ($className, $injectionPoints) {
-                foreach ($injectionPoints as $propertyName => $def) {
-                    [$definitionName, $optional] = $def;
-                    if ($optional === true && !$container->has($definitionName)) {
-                        continue;
-                    }
-                    ObjectCreator::setPrivatePropertyValue(
-                        $className,
-                        $previous,
-                        $propertyName,
-                        $container->get($definitionName)
-                    );
-                }
-                return $previous;
-            }),
-        ];
+        $this->injectionsCollection[$class->getName()] = $injectionPoints;
+        return [];
     }
 
     /**
@@ -112,7 +140,25 @@ class InjectionProcessor implements AttributeProcessorInterface
      */
     public function getInferredDefinitions(): array
     {
-        return [];
+        $output = [];
+        foreach ($this->injectionsCollection as $classFqcn => $injectionPoints) {
+            $output[$classFqcn] = decorate(function ($previous, ContainerInterface $container) use ($classFqcn, $injectionPoints) {
+                foreach ($injectionPoints as $propertyName => $def) {
+                    [$definitionName, $optional] = $def;
+                    if ($optional === true && !$container->has($definitionName)) {
+                        continue;
+                    }
+                    ObjectCreator::setPrivatePropertyValue(
+                        $classFqcn,
+                        $previous,
+                        $propertyName,
+                        $container->get($definitionName)
+                    );
+                }
+                return $previous;
+            });
+        }
+        return $output;
     }
 
     /**

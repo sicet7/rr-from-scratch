@@ -4,6 +4,7 @@ use Sicet7\Container\ContainerBuilder;
 use Sicet7\Container\Processors\DefinitionProcessor;
 use Sicet7\Module\ModuleProcessor;
 use Sicet7\PropertyInjection\InjectionProcessor;
+use Sicet7\Slim\Processors\RouteAndMiddlewareProcessor;
 
 /**
  * Processors registrations
@@ -14,6 +15,7 @@ use Sicet7\PropertyInjection\InjectionProcessor;
 ContainerBuilder::registerProcessor(DefinitionProcessor::class);
 ContainerBuilder::registerProcessor(ModuleProcessor::class);
 ContainerBuilder::registerProcessor(InjectionProcessor::class);
+ContainerBuilder::registerProcessor(RouteAndMiddlewareProcessor::class);
 
 /**
  * Source registrations
