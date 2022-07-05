@@ -1,0 +1,70 @@
+version: "2.7"
+
+rpc:
+    listen: tcp://127.0.0.1:6001
+
+server:
+    command: "php worker.php"
+    relay: "tcp://127.0.0.1:7000"
+    on_init:
+        command: "php ./init.php"
+    user: "www-data"
+    group: "www-data"
+
+http:
+    address: 0.0.0.0:8080
+    pool:
+        num_workers: 0
+        max_jobs: 100
+        debug: false
+    access_logs: false
+    max_request_size: 256
+    middleware: [ "headers", "gzip", "static" ]
+
+    uploads:
+        dir: "./var/tmp/uploads"
+
+    static:
+        dir: "./public"
+        forbid: [ "" ]
+        calculate_etag: true
+        weak: false
+        allow: [ ".ico", ]
+
+    headers:
+        cors:
+            allowed_origin: "*"
+            allowed_headers: "*"
+            allowed_methods: "*"
+            allow_credentials: true
+            exposed_headers: "Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma"
+            max_age: 600
+
+        response:
+            X-Powered-By: "MRS Inc."
+
+metrics:
+    address: 127.0.0.1:2112
+    collect:
+        request_counter:
+            type: counter
+            help: "Application counter."
+            labels: ["type"]
+
+status:
+    # Host and port to listen on (eg.: `127.0.0.1:2114`). Use the following URL: http://127.0.0.1:2114/health?plugin=http
+    # Multiple plugins must be separated using "&" - http://127.0.0.1:2114/health?plugin=http&plugin=rpc where "http" and
+    # "rpc" are active (connected) plugins.
+    #
+    # This option is required.
+    address: 127.0.0.1:2114
+
+logs:
+    mode: production
+    level: info
+    encoding: json
+    file_logger_options:
+        log_output: "./var/log/system.log"
+        max_size: 100
+        max_backups: 5
+        compress: true
