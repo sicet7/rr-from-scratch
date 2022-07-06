@@ -11,6 +11,4 @@ $container = ContainerBuilder::build();
 $worker = $container->get(\Sicet7\RoadRunner\Worker::class);
 /** @var \Sicet7\RoadRunner\Worker $worker */
 
-//die;
-
 $worker->run();

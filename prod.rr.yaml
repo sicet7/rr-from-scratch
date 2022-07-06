@@ -29,7 +29,7 @@ http:
         forbid: [ "" ]
         calculate_etag: true
         weak: false
-        allow: [ ".ico", ]
+        allow: [ ".ico", ".html", ".css", ".js", ".svg" ]
 
     headers:
         cors:
@@ -42,6 +42,9 @@ http:
 
         response:
             X-Powered-By: "MRS Inc."
+
+    http2:
+        h2c: false
 
 metrics:
     address: 127.0.0.1:2112

@@ -4,6 +4,8 @@ rpc:
     listen: tcp://127.0.0.1:6001
 
 server:
+    on_init:
+        command: "php ./init.php"
     command: "php worker.php"
     relay: "tcp://127.0.0.1:7000"
     env:
@@ -11,6 +13,12 @@ server:
 
 http:
     address: 0.0.0.0:8080
+    ssl:
+        address: :8892
+        redirect: true
+        cert: app.crt
+        key: app.key
+        root_ca: root.crt
     pool:
         num_workers: 1
         max_jobs: 10
@@ -27,7 +35,7 @@ http:
         forbid: [ "" ]
         calculate_etag: true
         weak: false
-        allow: [ ".ico", ]
+        allow: [ ".ico", ".html", ".css", ".js", ".svg" ]
 
     headers:
         cors:
@@ -40,6 +48,9 @@ http:
 
         response:
             X-Powered-By: "MRS Inc."
+
+    http2:
+        h2c: false
 
 metrics:
     address: 127.0.0.1:2112
