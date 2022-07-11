@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Modules;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;

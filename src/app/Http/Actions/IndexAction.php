@@ -31,9 +31,9 @@ class IndexAction
         $response = $this->responseFactory->createResponse()->withBody($this->streamFactory->createStreamFromFile(
             APP_ROOT . '/public/index.html'
         ));
-//        foreach (Finder::create()->files()->in([APP_ROOT . '/public/assets/'])->name('index.*') as $file) {
-//            $response = $response->withAddedHeader('http2-push', substr($file->getPathname(), strlen(APP_ROOT . '/public')));
-//        }
+        foreach (Finder::create()->files()->in([APP_ROOT . '/public/assets/'])->name('index.*') as $file) {
+            $response = $response->withAddedHeader('http2-push', substr($file->getPathname(), strlen(APP_ROOT . '/public')));
+        }
         return $response;
     }
 }

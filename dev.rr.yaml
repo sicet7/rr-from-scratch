@@ -10,15 +10,16 @@ server:
     relay: "tcp://127.0.0.1:7000"
     env:
         - XDEBUG_SESSION: 1
+        - OAUTH_ENCRYPTION_KEY: "YnQWPJ2qMkNh0sAGgNoFBsLdSJf3EOKV04HcDJmslDU"
 
 http:
     address: 0.0.0.0:8080
     ssl:
         address: :8892
         redirect: true
-        cert: app.crt
-        key: app.key
-        root_ca: root.crt
+        cert: ./certs/app.crt
+        key: ./certs/app.key
+        root_ca: ./certs/root.crt
     pool:
         num_workers: 1
         max_jobs: 10
@@ -32,7 +33,6 @@ http:
 
     static:
         dir: "./public"
-        forbid: [ "" ]
         calculate_etag: true
         weak: false
         allow: [ ".ico", ".html", ".css", ".js", ".svg" ]
@@ -43,7 +43,7 @@ http:
             allowed_headers: "*"
             allowed_methods: "*"
             allow_credentials: true
-            exposed_headers: "Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma"
+            exposed_headers: "Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma,http2-push"
             max_age: 600
 
         response:
@@ -66,7 +66,7 @@ reload:
 
     services:
         http:
-            dirs: [ "./src/" ]
+            dirs: [ "./src/app/", "./src/lib/" ]
             recursive: true
             patterns: [ ".php" ]
 

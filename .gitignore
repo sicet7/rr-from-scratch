@@ -17,10 +17,7 @@ src/client/*.local
 src/client/cypress/videos/
 src/client/cypress/screenshots/
 
-app.crt
-app.key
-root.crt
-root.key
+certs/
 
 vendor/
 var/
