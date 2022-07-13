@@ -4,12 +4,12 @@ namespace Sicet7\Slim\Attributes;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Sicet7\PropertyInjection\Interfaces\IgnoreAutoInjectionInterface;
+use Sicet7\Slim\BaseMiddleware;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class Middleware implements MiddlewareInterface, IgnoreAutoInjectionInterface
+class AttributeMiddleware extends BaseMiddleware implements IgnoreAutoInjectionInterface
 {
     /**
      * @var bool

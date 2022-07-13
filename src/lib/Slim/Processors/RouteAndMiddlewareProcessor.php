@@ -8,7 +8,7 @@ use Sicet7\Container\Factories\DefaultDefinitionFactory;
 use Sicet7\Container\Interfaces\AttributeProcessorInterface;
 use Sicet7\PropertyInjection\InjectionProcessor;
 use Sicet7\Slim\Attributes\FromBody;
-use Sicet7\Slim\Attributes\Middleware;
+use Sicet7\Slim\Attributes\AttributeMiddleware;
 use Sicet7\Slim\Attributes\Routing\Route;
 use Sicet7\Slim\Exceptions\ActionDefinitionException;
 use Slim\Interfaces\RouteCollectorInterface;
@@ -24,12 +24,12 @@ class RouteAndMiddlewareProcessor implements AttributeProcessorInterface
     private array $routeAttributes = [];
 
     /**
-     * @var Middleware[]
+     * @var AttributeMiddleware[]
      */
     private array $middlewareInstances = [];
 
     /**
-     * @var Middleware[][]
+     * @var AttributeMiddleware[][]
      */
     private array $middlewareMappings = [];
 
@@ -84,10 +84,10 @@ class RouteAndMiddlewareProcessor implements AttributeProcessorInterface
             $this->routeAttributes[$class->getName()] = $attribute->newInstance();
         }
 
-        if (!empty($middlewares = $class->getAttributes(Middleware::class, \ReflectionAttribute::IS_INSTANCEOF))) {
+        if (!empty($middlewares = $class->getAttributes(AttributeMiddleware::class, \ReflectionAttribute::IS_INSTANCEOF))) {
             foreach ($middlewares as $middleware) {
                 $instance = $middleware->newInstance();
-                /** @var Middleware $instance */
+                /** @var AttributeMiddleware $instance */
                 $identifier = $instance->getIdentifier();
                 if (!array_key_exists($identifier, $this->middlewareInstances)) {
                     $this->middlewareInstances[$identifier] = $instance;
@@ -137,7 +137,7 @@ class RouteAndMiddlewareProcessor implements AttributeProcessorInterface
                                     $container
                                 );
                                 ObjectCreator::setPrivatePropertyValue(
-                                    Middleware::class,
+                                    AttributeMiddleware::class,
                                     $middleware,
                                     'injectionsRun',
                                     true

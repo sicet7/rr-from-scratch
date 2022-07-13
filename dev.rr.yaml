@@ -55,7 +55,7 @@ http:
 metrics:
     address: 127.0.0.1:2112
     collect:
-        app_test_counter:
+        request_counter:
             type: counter
             help: "Application counter."
             labels: ["type"]

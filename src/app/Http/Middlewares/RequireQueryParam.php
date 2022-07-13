@@ -8,10 +8,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Sicet7\PropertyInjection\Attributes\Inject;
-use Sicet7\Slim\Attributes\Middleware;
+use Sicet7\Slim\Attributes\AttributeMiddleware;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class RequireQueryParam extends Middleware
+class RequireQueryParam extends AttributeMiddleware
 {
     /**
      * @var string
