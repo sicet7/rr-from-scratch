@@ -4,18 +4,14 @@ namespace Sicet7\Cookie;
 
 use HansOtt\PSR7Cookies\SetCookie;
 use Psr\Http\Message\ResponseInterface;
+use Sicet7\Interfaces\StringableInterface;
 
 class Cookie
 {
     /**
      * @var string
      */
-    private string $name;
-
-    /**
-     * @var string
-     */
-    private string $value;
+    private string $originalValue;
 
     /**
      * @var int
@@ -43,27 +39,28 @@ class Cookie
     private bool $httpOnly = false;
 
     /**
-     * @var string
+     * @var SameSite
      */
-    private string $sameSite = '';
+    private SameSite $sameSite = SameSite::EMPTY;
 
     /**
-     * @var SetCookie|null
+     * @var bool
      */
-    private ?SetCookie $setCookie = null;
+    private bool $hasChanged = false;
 
     /**
      * @param string $name
-     * @param string $value
+     * @param string|StringableInterface $value
      * @param bool $isNew
-     * @throws CookieException
      */
-    public function __construct(string $name, string $value, bool $isNew = true)
-    {
-        $this->name = $name;
-        $this->value = $value;
+    public function __construct(
+        private string $name,
+        private string|StringableInterface $value,
+        bool $isNew = true
+    ) {
+        $this->originalValue = ($value instanceof StringableInterface ? $value->toString() : $value);
         if ($isNew) {
-            $this->setCookie();
+            $this->hasChanged = true;
         }
     }
 
@@ -77,30 +74,32 @@ class Cookie
 
     /**
      * @param string $name
-     * @throws CookieException
      */
     public function setName(string $name): void
     {
+        if ($this->name != $name) {
+            $this->hasChanged = true;
+        }
         $this->name = $name;
-        $this->setCookie();
     }
 
     /**
-     * @return string
+     * @return string|StringableInterface
      */
-    public function getValue(): string
+    public function getValue(): string|StringableInterface
     {
         return $this->value;
     }
 
     /**
-     * @param string $value
-     * @throws CookieException
+     * @param string|StringableInterface $value
      */
-    public function setValue(string $value): void
+    public function setValue(string|StringableInterface $value): void
     {
+        if ((is_string($value) && $this->value != $value)) {
+            $this->hasChanged = true;
+        }
         $this->value = $value;
-        $this->setCookie();
     }
 
     /**
@@ -113,12 +112,13 @@ class Cookie
 
     /**
      * @param int $expiresAt
-     * @throws CookieException
      */
     public function setExpiresAt(int $expiresAt): void
     {
+        if ($this->expiresAt != $expiresAt) {
+            $this->hasChanged = true;
+        }
         $this->expiresAt = $expiresAt;
-        $this->setCookie();
     }
 
     /**
@@ -131,12 +131,13 @@ class Cookie
 
     /**
      * @param string $path
-     * @throws CookieException
      */
     public function setPath(string $path): void
     {
+        if ($this->path != $path) {
+            $this->hasChanged = true;
+        }
         $this->path = $path;
-        $this->setCookie();
     }
 
     /**
@@ -149,12 +150,13 @@ class Cookie
 
     /**
      * @param string $domain
-     * @throws CookieException
      */
     public function setDomain(string $domain): void
     {
+        if ($this->domain != $domain) {
+            $this->hasChanged = true;
+        }
         $this->domain = $domain;
-        $this->setCookie();
     }
 
     /**
@@ -167,12 +169,13 @@ class Cookie
 
     /**
      * @param bool $secure
-     * @throws CookieException
      */
     public function setSecure(bool $secure): void
     {
+        if ($this->secure != $secure) {
+            $this->hasChanged = true;
+        }
         $this->secure = $secure;
-        $this->setCookie();
     }
 
     /**
@@ -185,61 +188,76 @@ class Cookie
 
     /**
      * @param bool $httpOnly
-     * @throws CookieException
      */
     public function setHttpOnly(bool $httpOnly): void
     {
+        if ($this->httpOnly != $httpOnly) {
+            $this->hasChanged = true;
+        }
         $this->httpOnly = $httpOnly;
-        $this->setCookie();
     }
 
     /**
-     * @return string
+     * @return SameSite
      */
-    public function getSameSite(): string
+    public function getSameSite(): SameSite
     {
         return $this->sameSite;
     }
 
     /**
-     * @param string $sameSite
-     * @throws CookieException
+     * @param SameSite $sameSite
      */
-    public function setSameSite(string $sameSite): void
+    public function setSameSite(SameSite $sameSite): void
     {
+        if ($sameSite->value != $this->getSameSite()->value) {
+            $this->hasChanged = true;
+        }
         $this->sameSite = $sameSite;
-        $this->setCookie();
     }
 
     /**
      * @param ResponseInterface $response
      * @return ResponseInterface
+     * @throws CookieException
      * @internal
      */
     public function addToResponse(ResponseInterface $response): ResponseInterface
     {
-        if ($this->setCookie !== null) {
-            $response = $this->setCookie->addToResponse($response);
+        if ($this->hasChanged || $this->originalValue != $this->readValue()) {
+            $response = $this->makeSetCookie()->addToResponse($response);
         }
         return $response;
     }
 
     /**
-     * @return void
+     * @return string
+     */
+    private function readValue(): string
+    {
+        $value = $this->getValue();
+        if ($value instanceof StringableInterface) {
+            $value = $value->toString();
+        }
+        return $value;
+    }
+
+    /**
+     * @return SetCookie
      * @throws CookieException
      */
-    private function setCookie(): void
+    private function makeSetCookie(): SetCookie
     {
         try {
-            $this->setCookie = new SetCookie(
+            return new SetCookie(
                 $this->getName(),
-                $this->getValue(),
+                $this->readValue(),
                 $this->getExpiresAt(),
                 $this->getPath(),
                 $this->getDomain(),
                 $this->isSecure(),
                 $this->isHttpOnly(),
-                $this->getSameSite()
+                $this->getSameSite()->value
             );
         } catch (\Throwable $exception) {
             throw new CookieException('Failed to prepare cookie header.', $exception->getCode(), $exception);

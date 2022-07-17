@@ -8,6 +8,7 @@ use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Log\LoggerInterface;
+use Sicet7\Cookie\CookieJarMiddleware;
 use Sicet7\Module\Interfaces\ModuleInterface;
 use Slim\App;
 use function DI\decorate;
@@ -20,7 +21,9 @@ class AppModule implements ModuleInterface
     public static function getDefinitions(): array
     {
         return [
-            'slim.global.middlewares' => [],
+            'slim.global.middlewares' => [
+                CookieJarMiddleware::class,
+            ],
             App::class => decorate(function (App $app, ContainerInterface $container): App {
                 $app->addRoutingMiddleware();
                 $logger = ($container->has(LoggerInterface::class) ? $container->get(LoggerInterface::class) : null);
