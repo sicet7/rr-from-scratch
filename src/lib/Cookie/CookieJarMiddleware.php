@@ -6,8 +6,10 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Sicet7\Container\Attributes\Definition;
 use Sicet7\Slim\BaseMiddleware;
 
+#[Definition]
 class CookieJarMiddleware extends BaseMiddleware
 {
     public const ATTRIBUTE_NAME = 'cookieJar';
