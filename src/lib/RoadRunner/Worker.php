@@ -9,6 +9,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Sicet7\Container\Attributes\Definition;
 use Sicet7\RoadRunner\Events\BadRequest;
+use Sicet7\RoadRunner\Events\Init;
 use Sicet7\RoadRunner\Events\InternalServerError;
 use Sicet7\RoadRunner\Events\PostDispatch;
 use Sicet7\RoadRunner\Events\PreDispatch;
@@ -67,6 +68,14 @@ class Worker
         $this->logger = $logger;
         $this->eventDispatcher = $eventDispatcher;
         $this->responseFactory = $responseFactory;
+    }
+
+    /**
+     * @return void
+     */
+    public function init(): void
+    {
+        $this->eventDispatcher?->dispatch(new Init());
     }
 
     /**

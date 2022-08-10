@@ -10,7 +10,6 @@ server:
     relay: "tcp://127.0.0.1:7000"
     env:
         - XDEBUG_SESSION: 1
-        - OAUTH_ENCRYPTION_KEY: "YnQWPJ2qMkNh0sAGgNoFBsLdSJf3EOKV04HcDJmslDU"
 
 http:
     address: 0.0.0.0:8080

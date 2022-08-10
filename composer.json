@@ -18,7 +18,8 @@
         "monolog/monolog": "^3.1",
         "doctrine/orm": "^2.12",
         "hansott/psr7-cookies": "^3.0",
-        "lcobucci/jwt": "^4.1"
+        "lcobucci/jwt": "^4.1",
+        "doctrine/migrations": "^3.5"
     },
     "autoload": {
         "psr-4": {

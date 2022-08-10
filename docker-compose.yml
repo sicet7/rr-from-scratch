@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+    db:
+        image: mariadb:10.8
+        container_name: eav-try-db
+        ports:
+            - 3306:3306
+        environment:
+            MARIADB_ROOT_PASSWORD: "rootpw"
+            MARIADB_DATABASE: "default_database"
+            MARIADB_USER: "default_user"
+            MARIADB_PASSWORD: "default_password"
+        volumes:
+            - ./data/mariadb:/var/lib/mysql
